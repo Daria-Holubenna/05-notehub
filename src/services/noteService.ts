@@ -28,4 +28,4 @@ export async function fetchNotes(
   return response.data;
 }
 
-console.log(fetchNotes('A'));
+// console.log(fetchNotes('A'));
