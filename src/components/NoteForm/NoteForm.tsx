@@ -1,6 +1,9 @@
 import css from "./NoteForm.module.css";
+interface NoteFormProps{
+    cancelButton: () => void;
 
-export default function NoteForm() {
+}
+export default function NoteForm({cancelButton}:NoteFormProps) {
     return (
         <form className={css.form}>
             <div className={css.formGroup}>
@@ -14,7 +17,7 @@ export default function NoteForm() {
                 <textarea
                     id="content"
                     name="content"
-                    rows={8}
+                    rows={8} 
                     className={css.textarea}
                 />
                 <span name="content" className={css.error} />
@@ -33,7 +36,7 @@ export default function NoteForm() {
             </div>
 
             <div className={css.actions}>
-                <button type="button" className={css.cancelButton}>
+                <button type="button" className={css.cancelButton} onClick={cancelButton}>
                     Cancel
                 </button>
                 <button type="submit" className={css.submitButton} disabled={false}>

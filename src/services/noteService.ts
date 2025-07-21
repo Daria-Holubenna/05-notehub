@@ -1,7 +1,7 @@
 import axios from "axios";
 const apiKey = import.meta.env.VITE_NOTEHUB_TOKEN;
 import type Note from "../types/note";
-import { useId } from "react";
+
 
 interface NoteHttpResp {
   notes: Note[];
@@ -30,6 +30,7 @@ export async function fetchNotes(
 }
 
 type TagType = "Todo" | "Work" | "Shopping" | "Prsonal" | "Meeting";
+
 interface CreateNoteProps{
   title: string,
   content: string,
