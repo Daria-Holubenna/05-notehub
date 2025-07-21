@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react'
 import NoteList from '../NoteList/NoteList'
 import { useQuery, keepPreviousData, useMutation } from '@tanstack/react-query';
 import { fetchNotes} from '../../services/noteService'
+import { createNote } from '../../services/noteService'
+import NoteForm from '../NoteForm/NoteForm'
 
 
 
@@ -13,7 +15,8 @@ function App() {
 
 
   const [showModal, setShowModal] = useState(false);
-  const [search, setSearch] = useState('a');
+  const [modalContent, setModalContent] = useState(null);
+  const [search, setSearch] = useState(' ');
   const { data, isLoading, isError } = useQuery({
     queryKey: ['notes', search],
     queryFn: () => fetchNotes(search),
@@ -23,6 +26,8 @@ function App() {
   const handleInputChange = (valueInput:string) => {
     setSearch(valueInput);
   }
+  console.log(createNote);
+  
   useEffect(() => {
     if (search) {
       console.log('dont empty');
@@ -32,6 +37,29 @@ function App() {
     //   console.log('Очистка эффекта');
     // };
   }, [search]);
+// useEffect(()=>{
+//   if(!showModal){
+//     return null;
+//   } 
+// })
+
+useEffect(()=>{
+  const closeModalWindow = (showModal, setShowModal)=>{
+  const handleKeyDown = (event) => {
+    if(event.key === 'Escape'){
+      setShowModal(false);
+    }
+
+  }
+}
+  if(showModal){
+    document.addEventListener('keydown', closeModalWindow);
+  } 
+   return () => {
+      document.removeEventListener('keydown', closeModalWindow);
+    };
+}, [showModal])
+
 
 
   const notesToDisplay = data?.notes || [];
@@ -49,7 +77,7 @@ function App() {
           Create note +
         </button>
       
-        {showModal && <Modal />}
+        {showModal && <Modal><NoteForm/></Modal>}
       </header>
         {isLoading && <p>Loading notes...</p>}
       {isError && <p>Error loading notes!</p>}

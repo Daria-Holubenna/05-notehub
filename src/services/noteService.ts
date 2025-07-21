@@ -1,6 +1,7 @@
 import axios from "axios";
 const apiKey = import.meta.env.VITE_NOTEHUB_TOKEN;
 import type Note from "../types/note";
+import { useId } from "react";
 
 interface NoteHttpResp {
   notes: Note[];
@@ -28,4 +29,14 @@ export async function fetchNotes(
   return response.data;
 }
 
-// console.log(fetchNotes('A'));
+type TagType = "Todo" | "Work" | "Shopping" | "Prsonal" | "Meeting";
+interface CreateNoteProps{
+  title: string,
+  content: string,
+  tag: TagType,
+}
+export const createNote = async ({title, content, tag }: CreateNoteProps) =>{
+  const response =  await axios.post("https://notehub-public.goit.study/api/notes");
+  console.log(response.data.note.idNewNote);
+  return response.data.note.idNewNote;
+}
