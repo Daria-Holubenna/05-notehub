@@ -1,38 +1,66 @@
 import css from "./NoteForm.module.css";
+import { Formik, Form, Field, FormikHelpers, ErrorMessage } from "formik";
+import type { TagType } from "../../types/NoteTag";
+
+
+interface OrderFormValue {
+    title: string,
+    content: string,
+    tag: TagType}
+
+
 interface NoteFormProps{
     cancelButton: () => void;
-
+    onSubmit: (values: OrderFormValue)=> void;
 }
-export default function NoteForm({cancelButton}:NoteFormProps) {
+
+export default function NoteForm({cancelButton, onSubmit}:NoteFormProps) {
+
+    const handleSubmit = (
+  values: OrderFormValue,
+  { setSubmitting, resetForm }: FormikHelpers<OrderFormValue>
+) => {
+  console.log("Form submitted:", values);
+   onSubmit(values);
+  setSubmitting(false);
+  resetForm(); 
+};
+
     return (
-        <form className={css.form}>
+        <Formik initialValues={{
+            title: "",
+            content: "",
+            tag: "Todo"
+        }} onSubmit={handleSubmit}>
+        <Form className={css.form}>
             <div className={css.formGroup}>
                 <label htmlFor="title">Title</label>
-                <input id="title" type="text" name="title" className={css.input} />
-                <span name="title" className={css.error} />
+                <Field id="title" type="text" name="title" className={css.input} />
+                <ErrorMessage name="title" className={css.error} />
             </div>
 
             <div className={css.formGroup}>
                 <label htmlFor="content">Content</label>
-                <textarea
+                <Field
                     id="content"
                     name="content"
                     rows={8} 
                     className={css.textarea}
-                />
-                <span name="content" className={css.error} />
+                    as="textarea"
+                /> 
+                <ErrorMessage name="content" className={css.error} />
             </div>
 
             <div className={css.formGroup}>
                 <label htmlFor="tag">Tag</label>
-                <select id="tag" name="tag" className={css.select}>
+                <Field id="tag" name="tag" className={css.select} as="select">
                     <option value="Todo">Todo</option>
                     <option value="Work">Work</option>
                     <option value="Personal">Personal</option>
                     <option value="Meeting">Meeting</option>
                     <option value="Shopping">Shopping</option>
-                </select>
-                <span name="tag" className={css.error} />
+                </Field>
+                <ErrorMessage name="tag" className={css.error} />
             </div>
 
             <div className={css.actions}>
@@ -43,6 +71,7 @@ export default function NoteForm({cancelButton}:NoteFormProps) {
                     Create note
                 </button>
             </div>
-        </form>
+        </Form>
+        </Formik>
     );
 }

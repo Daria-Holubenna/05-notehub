@@ -4,10 +4,11 @@ import type { ReactNode } from "react";
 
 interface ModalProps{
    children: ReactNode;
+   closeWindow: ()=>void;
 }
-export default function Modal({children}:ModalProps) {
+export default function Modal({children, closeWindow}:ModalProps) {
   return createPortal(
-    <div className={css.backdrop} role="dialog" aria-modal="true">
+    <div className={css.backdrop} onClick={closeWindow} role="dialog" aria-modal="true">
       <div className={css.modal} >{children}</div>
     </div>,
     document.body

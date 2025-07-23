@@ -1,7 +1,7 @@
 import axios from "axios";
 const apiKey = import.meta.env.VITE_NOTEHUB_TOKEN;
 import type Note from "../types/note";
-
+import type NoteTag from "../types/NoteTag";
 
 interface NoteHttpResp {
   notes: Note[];
@@ -9,11 +9,11 @@ interface NoteHttpResp {
 }
 
 export async function fetchNotes(
-  search: string,
+  search: string
   // page: number
 ): Promise<NoteHttpResp> {
   const response = await axios.get<NoteHttpResp>(
-    "https://notehub-public.goit.study/api/notes",
+    "https://notehub-public.goit.study/api/notes?page=1&perPage=12",
     {
       params: {
         search,
@@ -24,20 +24,32 @@ export async function fetchNotes(
       },
     }
   );
-  console.log('тут респонса:', response.data.notes);
-
+  console.log("тут респонса:", response.data.notes);
   return response.data;
 }
 
-type TagType = "Todo" | "Work" | "Shopping" | "Prsonal" | "Meeting";
-
-interface CreateNoteProps{
-  title: string,
-  content: string,
-  tag: TagType,
-}
-export const createNote = async ({title, content, tag }: CreateNoteProps) =>{
-  const response =  await axios.post("https://notehub-public.goit.study/api/notes");
-  console.log(response.data.note.idNewNote);
+export const createNote = async (noteData: NoteTag) => {
+  const response = await axios.post(
+    "https://notehub-public.goit.study/api/notes",
+    noteData,
+    {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    }
+  );
+  console.log(response.data.note.idNewNote);  
   return response.data.note.idNewNote;
+};
+
+export const deleteNote = async (NoteId:number)=> {
+  const response = await axios.delete(`https://notehub-public.goit.study/api/notes/${NoteId}`,
+     {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    }
+  );
+    console.log(response.data.message);
+  return response.data.message
 }

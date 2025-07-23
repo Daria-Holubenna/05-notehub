@@ -1,7 +1,7 @@
 import css from "./SearchBox.module.css";
 
 
-import { useEffect, useState } from 'react'
+import {  useState } from 'react'
 
 
 
