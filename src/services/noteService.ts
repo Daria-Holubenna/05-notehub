@@ -3,7 +3,6 @@ const apiKey = import.meta.env.VITE_NOTEHUB_TOKEN;
 import type Note from "../types/note";
 import type NoteTag from "../types/NoteTag";
 
-
 interface NoteHttpResp {
   notes: Note[];
   totalPages: number;
@@ -12,10 +11,10 @@ interface NoteHttpResp {
 export async function fetchNotes(
   search: string,
   page: number = 1,
-  perPage: number = 12,
+  perPage: number = 12
 ): Promise<NoteHttpResp> {
   const response = await axios.get<NoteHttpResp>(
-    "https://notehub-public.goit.study/api/notes/",
+    "https://notehub-public.goit.study/api/notes",
     {
       params: {
         search,
@@ -27,20 +26,20 @@ export async function fetchNotes(
       },
     }
   );
-  console.log("тут респонса:", response.data.notes);
   return response.data;
 }
 
-
-interface CreateNoteResponse {
+export interface CreateNoteResponse {
   note: {
-    idNewNote: number; 
+    idNewNote: number;
     title: string;
     content: string;
     tag: string;
   };
 }
-export const createNote = async (noteData: NoteTag):Promise<number> => {
+export const createNote = async (
+  noteData: NoteTag
+): Promise<CreateNoteResponse> => {
   const response = await axios.post<CreateNoteResponse>(
     "https://notehub-public.goit.study/api/notes",
     noteData,
@@ -50,22 +49,21 @@ export const createNote = async (noteData: NoteTag):Promise<number> => {
       },
     }
   );
-  console.log(response.data.note.idNewNote);  
-  return response.data.note.idNewNote;
+  return response.data;
 };
 
-
-interface DeleteNoteResponse {
-  message: string; 
+export interface DeleteNoteResponse {
+  message: string;
 }
-export const deleteNote = async (NoteId:number):Promise<string>=> {
-  const response = await axios.delete<DeleteNoteResponse>(`https://notehub-public.goit.study/api/notes/${NoteId}`,
-     {
+export const deleteNote = async (NoteId: number): Promise<string> => {
+  const response = await axios.delete<DeleteNoteResponse>(
+    `https://notehub-public.goit.study/api/notes/${NoteId}`,
+    {
       headers: {
         Authorization: `Bearer ${apiKey}`,
       },
     }
   );
-    console.log(response.data.message);
-  return response.data.message
-}
+
+  return response.data.message;
+};

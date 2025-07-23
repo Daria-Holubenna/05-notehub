@@ -10,37 +10,27 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { createNote, deleteNote, fetchNotes } from "../../services/noteService";
+
 import NoteForm from "../NoteForm/NoteForm";
 import type NoteTag from "../../types/NoteTag";
-import { useDebounce } from 'use-debounce';
+import { useDebounce } from "use-debounce";
 import Pagination from "../Pagination/Pagination";
-
+import toast, { Toaster } from "react-hot-toast";
 
 function App() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
- const [debouncedSearch] = useDebounce(search, 500); 
+  const [debouncedSearch] = useDebounce(search, 500);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12; 
-
+  const itemsPerPage = 12;
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["notes", debouncedSearch, currentPage, itemsPerPage],
-    queryFn:   ()=>{const finalSearchTerm = debouncedSearch === "" ? " " : debouncedSearch;
-
-
-        console.log("Calling fetchNotes with:");
-        console.log("  search:", finalSearchTerm, " (type:", typeof finalSearchTerm, ")");
-        console.log("  currentPage:", currentPage, " (type:", typeof currentPage, ")");
-        console.log("  itemsPerPage:", itemsPerPage, " (type:", typeof itemsPerPage, ")");
-         console.log("Calling fetchNotes with:");
-        console.log("  search:", finalSearchTerm);
-        console.log("  currentPage:", currentPage);
-        console.log("  itemsPerPage:", itemsPerPage);
-
-
-        return fetchNotes(finalSearchTerm, currentPage, itemsPerPage)},
+    queryFn: () => {
+      const finalSearchTerm = debouncedSearch === "" ? " " : debouncedSearch;
+      return fetchNotes(finalSearchTerm, currentPage, itemsPerPage);
+    },
     placeholderData: keepPreviousData,
     // enabled: true,
   });
@@ -50,26 +40,35 @@ function App() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       closeModalWindow();
+      toast.success("The note was created successfully!");
+      setCurrentPage(1);
     },
     onError: (error) => {
       console.error("Ошибка создания заметки:", error);
+      toast.error(
+        "An error occurred while creating a note. No note was created!"
+      );
     },
   });
   const deleteMutation = useMutation({
     mutationFn: (noteId: number) => deleteNote(noteId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] }); 
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      toast.success("Note successfully deleted!");
     },
     onError: (error) => {
       console.error("Ошибка удаления:", error);
+      toast.error(
+        "An error occurred while deleting a note. The note was not deleted!"
+      );
     },
   });
 
   const handleInputChange = (valueInput: string) => {
     setSearch(valueInput);
-     setCurrentPage(1); 
+    setCurrentPage(1);
   };
-    const closeModalWindow = () => {
+  const closeModalWindow = () => {
     setShowModal(false);
   };
   useEffect(() => {
@@ -86,26 +85,25 @@ function App() {
     }
   }, [showModal]);
 
-   const handlePageClick = (event: { selected: number }) => {
+  const handlePageClick = (event: { selected: number }) => {
     setCurrentPage(event.selected + 1);
   };
 
- const notesToDisplay = data?.notes || [];
-  const totalPages = data?.totalPages || 0; 
-
+  const notesToDisplay = data?.notes || [];
+  const totalPages = data?.totalPages || 0;
 
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
         <SearchBox onSearchChange={handleInputChange} />
 
-       {totalPages > 1 && (
-  <Pagination
-    pageCount={totalPages}
-    onPageChange={handlePageClick} 
-    currentPage={currentPage}
-  />
-)}
+        {totalPages > 1 && (
+          <Pagination
+            pageCount={totalPages}
+            onPageChange={handlePageClick}
+            currentPage={currentPage}
+          />
+        )}
 
         <button className={css.button} onClick={() => setShowModal(true)}>
           Create note +
@@ -120,15 +118,17 @@ function App() {
           </Modal>
         )}
       </header>
-      <p>your text is: {search}</p>
       {notesToDisplay.length > 0 ? (
-              <NoteList notes={notesToDisplay} deleteNote={(id) => deleteMutation.mutate(id)} />
-
+        <NoteList
+          notes={notesToDisplay}
+          deleteNote={(id) => deleteMutation.mutate(id)}
+        />
       ) : (
         !isLoading && !isError && <p>No notes found. Create your first note!</p>
       )}
       {isLoading && <p>Loading notes...</p>}
       {isError && <p>Error loading notes!</p>}
+      <Toaster />
     </div>
   );
 }
