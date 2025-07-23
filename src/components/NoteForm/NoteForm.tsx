@@ -1,6 +1,8 @@
 import css from "./NoteForm.module.css";
-import { Formik, Form, Field, FormikHelpers, ErrorMessage } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import type { FormikHelpers } from "formik";
 import type { TagType } from "../../types/NoteTag";
+import * as Yup from "yup";
 
 
 interface OrderFormValue {
@@ -13,7 +15,17 @@ interface NoteFormProps{
     cancelButton: () => void;
     onSubmit: (values: OrderFormValue)=> void;
 }
-
+const validationSchema = Yup.object().shape({
+  title: Yup.string()
+    .min(3, "Title must be at least 3 characters")
+    .max(50, "Title is too long")
+    .required("Title is required"),
+  content: Yup.string()
+    .max(500, "Content is too long"), // Content не обов'язковий, але з обмеженням довжини
+  tag: Yup.string()
+    .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping", ""], 'Невірний тег') // Додаємо "" до дозволених значень, якщо 'None' або порожній тег можливий
+    .required("Tag is required"),
+});
 export default function NoteForm({cancelButton, onSubmit}:NoteFormProps) {
 
     const handleSubmit = (
@@ -31,7 +43,9 @@ export default function NoteForm({cancelButton, onSubmit}:NoteFormProps) {
             title: "",
             content: "",
             tag: "Todo"
-        }} onSubmit={handleSubmit}>
+        }} onSubmit={handleSubmit}
+          validationSchema={validationSchema}>
+            
         <Form className={css.form}>
             <div className={css.formGroup}>
                 <label htmlFor="title">Title</label>

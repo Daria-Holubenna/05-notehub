@@ -12,18 +12,37 @@ import {
 import { createNote, deleteNote, fetchNotes } from "../../services/noteService";
 import NoteForm from "../NoteForm/NoteForm";
 import type NoteTag from "../../types/NoteTag";
-// import PaginatedItems from "../Pagination/Pagination";
+import { useDebounce } from 'use-debounce';
+import Pagination from "../Pagination/Pagination";
+
 
 function App() {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState(" ");
+  const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
+ const [debouncedSearch] = useDebounce(search, 500); 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12; 
+
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["notes", search],
-    queryFn: () => fetchNotes(search),
+    queryKey: ["notes", debouncedSearch, currentPage, itemsPerPage],
+    queryFn:   ()=>{const finalSearchTerm = debouncedSearch === "" ? " " : debouncedSearch;
+
+
+        console.log("Calling fetchNotes with:");
+        console.log("  search:", finalSearchTerm, " (type:", typeof finalSearchTerm, ")");
+        console.log("  currentPage:", currentPage, " (type:", typeof currentPage, ")");
+        console.log("  itemsPerPage:", itemsPerPage, " (type:", typeof itemsPerPage, ")");
+         console.log("Calling fetchNotes with:");
+        console.log("  search:", finalSearchTerm);
+        console.log("  currentPage:", currentPage);
+        console.log("  itemsPerPage:", itemsPerPage);
+
+
+        return fetchNotes(finalSearchTerm, currentPage, itemsPerPage)},
     placeholderData: keepPreviousData,
-    enabled: !!search,
+    // enabled: true,
   });
 
   const createMutation = useMutation({
@@ -48,6 +67,7 @@ function App() {
 
   const handleInputChange = (valueInput: string) => {
     setSearch(valueInput);
+     setCurrentPage(1); 
   };
     const closeModalWindow = () => {
     setShowModal(false);
@@ -65,24 +85,27 @@ function App() {
       };
     }
   }, [showModal]);
- const notesToDisplay = data?.notes || [];
 
-  // useEffect(() => {
-  //   if (search) {
-  //     console.log("dont empty");
-  //   }
-  //   // return () => {
-  //   //   setSearch('');
-  //   //   console.log('Очистка эффекта');
-  //   // };
-  // }, [search]);
+   const handlePageClick = (event: { selected: number }) => {
+    setCurrentPage(event.selected + 1);
+  };
+
+ const notesToDisplay = data?.notes || [];
+  const totalPages = data?.totalPages || 0; 
+
 
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
         <SearchBox onSearchChange={handleInputChange} />
 
-        {/* <PaginatedItems /> */}
+       {totalPages > 1 && (
+  <Pagination
+    pageCount={totalPages}
+    onPageChange={handlePageClick} 
+    currentPage={currentPage}
+  />
+)}
 
         <button className={css.button} onClick={() => setShowModal(true)}>
           Create note +
