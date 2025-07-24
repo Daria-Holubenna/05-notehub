@@ -30,12 +30,10 @@ export async function fetchNotes(
 }
 
 export interface CreateNoteResponse {
-  note: {
-    idNewNote: number;
-    title: string;
-    content: string;
-    tag: string;
-  };
+  id: number;
+  title: string;
+  content: string;
+  tag: string;
 }
 export const createNote = async (
   noteData: NoteTag
@@ -53,9 +51,14 @@ export const createNote = async (
 };
 
 export interface DeleteNoteResponse {
-  message: string;
+  id: number;
+  title: string;
+  content: string;
+  tag: string;
 }
-export const deleteNote = async (NoteId: number): Promise<string> => {
+export const deleteNote = async (
+  NoteId: number
+): Promise<DeleteNoteResponse> => {
   const response = await axios.delete<DeleteNoteResponse>(
     `https://notehub-public.goit.study/api/notes/${NoteId}`,
     {
@@ -65,5 +68,5 @@ export const deleteNote = async (NoteId: number): Promise<string> => {
     }
   );
 
-  return response.data.message;
+  return response.data;
 };
